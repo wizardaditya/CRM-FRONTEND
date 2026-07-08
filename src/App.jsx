@@ -29,6 +29,15 @@ const CFORoute = ({ children }) => {
   return children;
 };
 
+// Smart catch-all — redirect to dashboard if logged in, else login
+const CatchAll = () => {
+  const { isAuthenticated, user } = useAuthStore();
+  if (isAuthenticated && ['CFO', 'ADMIN', 'CEO'].includes(user?.role)) {
+    return <Navigate to="/cfo/dashboard" replace />;
+  }
+  return <Navigate to="/cfo/login" replace />;
+};
+
 const PageLoader = () => (
   <div className="flex items-center justify-center min-h-screen bg-dark-950">
     <LoadingSpinner size="lg" />
@@ -69,8 +78,8 @@ export default function App() {
           <Route path="settings"        element={<FinanceSettings />} />
         </Route>
 
-        {/* 404 */}
-        <Route path="*" element={<Navigate to="/cfo/login" replace />} />
+        {/* 404 — smart redirect */}
+        <Route path="*" element={<CatchAll />} />
       </Routes>
     </Suspense>
   );

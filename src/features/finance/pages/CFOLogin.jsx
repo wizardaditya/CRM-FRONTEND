@@ -35,7 +35,8 @@ export default function CFOLogin() {
 
       setAuth(u, accessToken, refreshToken);
       toast.success(`Welcome back, ${u.name}!`);
-      navigate('/cfo/dashboard');
+      // Small delay to let zustand persist state before route guard checks
+      setTimeout(() => navigate('/cfo/dashboard', { replace: true }), 100);
     } catch (err) {
       toast.error(err.response?.data?.message || 'Login failed');
     } finally {
