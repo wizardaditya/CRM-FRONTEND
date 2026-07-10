@@ -18,20 +18,25 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Handle 401 — attempt token refresh
+// Handle 401 — attempt token refresh (only once, never retry refresh/logout itself)
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const original = error.config;
 
-    if (error.response?.status === 401 && !original._retry) {
+    // Don't retry if already retried, or if it's an auth endpoint itself
+    const isAuthEndpoint = original.url?.includes('/auth/refresh') ||
+                           original.url?.includes('/auth/login') ||
+                           original.url?.includes('/auth/logout');
+
+    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
       original._retry = true;
 
       try {
         const refreshToken = localStorage.getItem('refreshToken');
         if (!refreshToken) throw new Error('No refresh token');
 
-        const res = await axios.post('/api/auth/refresh', { refreshToken });
+        const res = await axios.post('/api/v1/auth/refresh', { refreshToken });
         const { accessToken, refreshToken: newRefresh } = res.data.data;
 
         localStorage.setItem('accessToken', accessToken);
@@ -43,7 +48,9 @@ api.interceptors.response.use(
         localStorage.removeItem('accessToken');
         localStorage.removeItem('refreshToken');
         localStorage.removeItem('user');
-        window.location.href = '/cfo/login';
+        // Redirect to appropriate login
+        const isCFO = window.location.pathname.startsWith('/cfo');
+        window.location.href = isCFO ? '/cfo/login' : '/login';
       }
     }
 
