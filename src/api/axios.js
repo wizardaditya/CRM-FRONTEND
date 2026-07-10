@@ -1,60 +1,61 @@
 import axios from 'axios';
+import { API_URL } from '@/constants';
+import { useAuthStore } from '@/store/authStore';
 
 const api = axios.create({
-  baseURL: '/api',
-  timeout: 30000,
+  baseURL:         API_URL,
+  withCredentials: true,
   headers: { 'Content-Type': 'application/json' },
 });
 
 // Attach access token to every request
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+api.interceptors.request.use((config) => {
+  const token = useAuthStore.getState().accessToken;
+  if (token) config.headers.Authorization = `Bearer ${token}`;
+  return config;
+});
 
-// Handle 401 — attempt token refresh (only once, never retry refresh/logout itself)
+// Auto-refresh on 401
+let isRefreshing = false;
+let failedQueue  = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((p) => (error ? p.reject(error) : p.resolve(token)));
+  failedQueue = [];
+};
+
 api.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const original = error.config;
-
-    // Don't retry if already retried, or if it's an auth endpoint itself
-    const isAuthEndpoint = original.url?.includes('/auth/refresh') ||
-                           original.url?.includes('/auth/login') ||
-                           original.url?.includes('/auth/logout');
-
-    if (error.response?.status === 401 && !original._retry && !isAuthEndpoint) {
+  (res) => res,
+  async (err) => {
+    const original = err.config;
+    if (err.response?.status === 401 && !original._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then((token) => {
+          original.headers.Authorization = `Bearer ${token}`;
+          return api(original);
+        });
+      }
       original._retry = true;
-
+      isRefreshing    = true;
       try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) throw new Error('No refresh token');
-
-        const res = await axios.post('/api/v1/auth/refresh', { refreshToken });
-        const { accessToken, refreshToken: newRefresh } = res.data.data;
-
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', newRefresh);
-
-        original.headers.Authorization = `Bearer ${accessToken}`;
+        const { data } = await axios.post(`${API_URL}/auth/refresh`, {}, { withCredentials: true });
+        const newToken = data.data.accessToken;
+        useAuthStore.getState().setAccessToken(newToken);
+        processQueue(null, newToken);
+        original.headers.Authorization = `Bearer ${newToken}`;
         return api(original);
-      } catch {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        // Redirect to appropriate login
-        const isCFO = window.location.pathname.startsWith('/cfo');
-        window.location.href = isCFO ? '/cfo/login' : '/login';
+      } catch (refreshErr) {
+        processQueue(refreshErr, null);
+        useAuthStore.getState().logout();
+        window.location.href = '/login';
+        return Promise.reject(refreshErr);
+      } finally {
+        isRefreshing = false;
       }
     }
-
-    return Promise.reject(error);
+    return Promise.reject(err);
   }
 );
 

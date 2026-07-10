@@ -9,8 +9,8 @@ import './styles/index.css';
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime: 1000 * 60 * 5, // 5 minutes
       retry: 1,
+      staleTime: 30_000,
       refetchOnWindowFocus: false,
     },
   },
@@ -22,21 +22,13 @@ ReactDOM.createRoot(document.getElementById('root')).render(
       <BrowserRouter>
         <App />
         <Toaster
-          position="top-right"
+          position="bottom-right"
           toastOptions={{
-            duration: 3000,
+            duration: 3500,
             style: {
-              background: '#1e293b',
-              color: '#f1f5f9',
-              border: '1px solid #334155',
               borderRadius: '12px',
-              fontSize: '14px',
-            },
-            success: {
-              iconTheme: { primary: '#22c55e', secondary: '#fff' },
-            },
-            error: {
-              iconTheme: { primary: '#ef4444', secondary: '#fff' },
+              fontWeight:   600,
+              fontSize:     '13.5px',
             },
           }}
         />
