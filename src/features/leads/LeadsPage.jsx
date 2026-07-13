@@ -47,7 +47,7 @@ export const LeadsPage = () => {
     queryKey: ['leads', { page, search, status, priority, assignedToId }],
     queryFn: () =>
       leadService.getAll({ page, limit: 20, search, status, priority, assignedToId }).then((r) => r.data),
-    keepPreviousData: true,
+    staleTime: 30000, // 30 seconds cache
   });
 
   const { data: usersData } = useQuery({

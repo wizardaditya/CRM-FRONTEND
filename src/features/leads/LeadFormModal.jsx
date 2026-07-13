@@ -90,10 +90,9 @@ export const LeadFormModal = ({ isOpen, onClose, lead }) => {
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Organization</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Organization *"
+              label="Organization"
               placeholder="Company name"
-              error={errors.organization?.message}
-              {...register('organization', { required: 'Organization is required' })}
+              {...register('organization')}
             />
             <Input label="Contact Person" placeholder="Full name" {...register('contactPerson')} />
             <Input label="Designation" placeholder="e.g. Principal" {...register('designation')} />
@@ -109,10 +108,9 @@ export const LeadFormModal = ({ isOpen, onClose, lead }) => {
           <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wide mb-3">Contact Details</h3>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Input
-              label="Mobile *"
+              label="Mobile"
               placeholder="+91 98765 43210"
-              error={errors.mobile?.message}
-              {...register('mobile', { required: 'Mobile is required' })}
+              {...register('mobile')}
             />
             <Input label="WhatsApp" placeholder="Same as mobile or different" {...register('whatsapp')} />
             <Input label="Email" type="email" placeholder="email@company.com" {...register('email')} />
