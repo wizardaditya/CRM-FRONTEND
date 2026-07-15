@@ -13,6 +13,7 @@ import {
 
 const INDUSTRIES = ['Education', 'Technology', 'Healthcare', 'Finance', 'Retail', 'Manufacturing', 'Real Estate', 'Other'];
 const PRIORITIES = ['HIGH', 'MEDIUM', 'LOW'];
+const BOARDS = ['CBSE', 'ICSE', 'MP Board', 'UP Board', 'Bihar Board', 'Gujarat Board', 'Maharashtra Board', 'Karnataka Board', 'Tamil Nadu Board', 'West Bengal Board', 'Rajasthan Board', 'Other'];
 
 export const LeadFormModal = ({ isOpen, onClose, lead }) => {
   const qc = useQueryClient();
@@ -29,7 +30,7 @@ export const LeadFormModal = ({ isOpen, onClose, lead }) => {
       organization: '', contactPerson: '', designation: '', mobile: '',
       whatsapp: '', email: '', website: '', address: '', city: '',
       state: '', country: 'India', industry: '', source: '',
-      interestedService: '', status: 'NEW_LEAD', priority: 'MEDIUM',
+      interestedService: '', boards: '', status: 'NEW_LEAD', priority: 'MEDIUM',
       expectedValue: '', probability: '', expectedCloseDate: '',
       proposalSent: false, demoDone: false, decisionMaker: false,
       assignedToId: '', remarks: '',
@@ -49,7 +50,7 @@ export const LeadFormModal = ({ isOpen, onClose, lead }) => {
           organization: '', contactPerson: '', designation: '', mobile: '',
           whatsapp: '', email: '', website: '', address: '', city: '',
           state: '', country: 'India', industry: '', source: '',
-          interestedService: '', status: 'NEW_LEAD', priority: 'MEDIUM',
+          interestedService: '', boards: '', status: 'NEW_LEAD', priority: 'MEDIUM',
           expectedValue: '', probability: '', expectedCloseDate: '',
           proposalSent: false, demoDone: false, decisionMaker: false,
           assignedToId: '', remarks: '',
@@ -142,6 +143,10 @@ export const LeadFormModal = ({ isOpen, onClose, lead }) => {
             <Select label="Interested Service" {...register('interestedService')}>
               <option value="">Select service</option>
               {SERVICES.map((s) => <option key={s}>{s}</option>)}
+            </Select>
+            <Select label="Educational Board" {...register('boards')}>
+              <option value="">Select board</option>
+              {BOARDS.map((b) => <option key={b} value={b}>{b}</option>)}
             </Select>
             <Select label="Status" {...register('status')}>
               {LEAD_STATUSES.map((s) => (
