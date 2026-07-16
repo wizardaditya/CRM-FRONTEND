@@ -148,6 +148,7 @@ export const LeadFormModal = ({ isOpen, onClose, lead }) => {
               <option value="">Select board</option>
               {BOARDS.map((b) => <option key={b} value={b}>{b}</option>)}
             </Select>
+
             <Select label="Status" {...register('status')}>
               {LEAD_STATUSES.map((s) => (
                 <option key={s} value={s}>{LEAD_STATUS_LABELS[s]}</option>
